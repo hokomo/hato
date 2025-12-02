@@ -306,23 +306,22 @@
          {:request     req
           :http-client http-client
           :response    resp}))
-
-      (-> (.sendAsync http-client http-request bh)
-          (.thenApply
-           (reify Function
-             (apply [_ resp]
-               (respond
-                (response-map
-                 {:request     req
-                  :http-client http-client
-                  :response    resp})))))
-          (.exceptionally
-           (reify Function
-             (apply [_ e]
-               (let [cause (.getCause ^Exception e)]
-                 (if (instance? ExceptionInfo cause)
-                   (raise cause)
-                   (raise e))))))))))
+      (doto (.sendAsync http-client http-request bh)
+        (.thenApply
+         (reify Function
+           (apply [_ resp]
+             (respond
+              (response-map
+               {:request     req
+                :http-client http-client
+                :response    resp})))))
+        (.exceptionally
+         (reify Function
+           (apply [_ e]
+             (let [cause (.getCause ^Exception e)]
+               (if (instance? ExceptionInfo cause)
+                 (raise cause)
+                 (raise e))))))))))
 
 (defn request
   [req & [respond raise]]
